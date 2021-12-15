@@ -1,0 +1,9 @@
+.idea/
+__pycache__/
+upload/
+tmp/
+*env/
+*.db
+*.pyc
+*.log
+*.pot
