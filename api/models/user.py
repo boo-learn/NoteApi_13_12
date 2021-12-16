@@ -13,9 +13,13 @@ class UserModel(db.Model):
     is_staff = db.Column(db.Boolean(), default=False, server_default="false", nullable=False)
     role = db.Column(db.String(32), nullable=False, server_default="simple_user", default="simple_user")
 
-    def __init__(self, username, password):
+    def __init__(self, username, password, role="simple_user"):
         self.username = username
         self.hash_password(password)
+        self.role = role
+
+    def get_roles(self):
+        return self.role
 
     def hash_password(self, password):
         self.password_hash = pwd_context.hash(password)

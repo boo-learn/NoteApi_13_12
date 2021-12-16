@@ -89,7 +89,26 @@ class TestUsers(TestCase):
         """
         Редактирование пользователя
         """
-        pass
+        user_data = {
+            "username": 'admin',
+            'password': 'admin',
+            "role": "admin"
+        }
+        user = UserModel(**user_data)
+        user.save()
+        headers = {
+            'Authorization': 'Basic ' + b64encode(
+                f"{user_data['username']}:{user_data['password']}".encode('ascii')).decode('utf-8')}
+        user_id = user.id
+        new_name = {"username": "Alex"}
+        response = self.client.put(f'/users/{user_id}',
+                                   headers=headers,
+                                   data=json.dumps(new_name),
+                                   content_type='application/json'
+                                   )
+        data = json.loads(response.data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["username"], "Alex")
 
     def test_delete_user(self):
         """
