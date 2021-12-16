@@ -5,6 +5,41 @@ from api.schemas.user import user_schema, users_schema
 
 class UserResource(Resource):
     def get(self, user_id):
+        # language=YAML
+        """
+        Get User by id
+        ---
+        tags:
+            - Users
+        parameters:
+             - in: path
+               name: user_id
+               type: integer
+               required: true
+               default: 1
+        responses:
+           200:
+               description: A single user item
+               schema:
+                   id: User
+                   properties:
+                       id:
+                           type: integer
+                           description: user id
+                           default: 1
+                       username:
+                           type: string
+                           description: The name of the user
+                           default: Steven Wilson
+                       is_staff:
+                           type: boolean
+                           description: user is staff
+                           default: false
+                       role:
+                           type: string
+                           description: user role
+                           default: simple_user
+        """
         user = UserModel.query.get(user_id)
         if not user:
             abort(404, error=f"User with id={user_id} not found")
@@ -27,6 +62,14 @@ class UserResource(Resource):
 
 class UsersListResource(Resource):
     def get(self):
+        # language=YAML
+        """
+        Get all Users
+        ---
+        tags:
+           - Users
+        """
+
         users = UserModel.query.all()
         return users_schema.dump(users), 200
 
