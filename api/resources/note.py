@@ -1,9 +1,11 @@
 from api import auth, abort, g, Resource, reqparse
 from api.models.note import NoteModel
+from api.models.tag import TagModel
 from flask_apispec import marshal_with, use_kwargs, doc
 from sqlalchemy.orm.exc import NoResultFound
 from api.schemas.note import NoteSchema, NoteCreateSchema, NoteEditSchema
 from flask_apispec.views import MethodResource
+from webargs import fields
 
 
 @doc(tags=['Notes'])
@@ -72,3 +74,19 @@ class NotesListResource(MethodResource):
         note = NoteModel(author_id=author.id, **kwargs)
         note.save()
         return note, 201
+
+
+@doc(tags=['Notes'])
+class NoteSetTagsResource(MethodResource):
+    @doc(summary="Set tags to Note")
+    @use_kwargs({"tags": fields.List(fields.Int())}, location=('json'))
+    @marshal_with(NoteSchema)
+    def put(self, note_id, **kwargs):
+        note = NoteModel.query.get(note_id)
+        if not note:
+            abort(404, error=f"note {note_id} not found")
+        for tag_id in kwargs["tags"]:
+            tag = TagModel.query.get(tag_id)
+            note.tags.append(tag)
+        note.save()
+        return note, 200
