@@ -6,15 +6,21 @@ from api.schemas.user import UserSchema
 #       schema        flask-restful
 # object ------>  dict ----------> json
 
-class NoteSchema(ma.SQLAlchemySchema):
+class NoteSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = NoteModel
 
-    id = ma.auto_field()
-    text = ma.auto_field()
-    private = ma.auto_field()
     author = ma.Nested(UserSchema())
 
 
-note_schema = NoteSchema()
-notes_schema = NoteSchema(many=True)
+class NoteCreateSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = NoteModel
+        fields = ["text", "private"]
+
+
+class NoteEditSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = NoteModel
+    text = ma.auto_field(required=False)
+    private = ma.auto_field(required=False)

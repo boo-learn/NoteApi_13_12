@@ -282,7 +282,6 @@ class TestNotes(TestCase):
                 "text": 'Test note 2',
             }
         ]
-        ids = []
         for note_data in notes_data:
             note = NoteModel(author_id=self.user.id, **note_data)
             note.save()
@@ -290,7 +289,6 @@ class TestNotes(TestCase):
         res = self.client.delete('/notes/2', headers=self.headers)
         data = json.loads(res.data)
         self.assertEqual(res.status_code, 200)
-        self.assertIn("2", data)
 
     def test_delete_not_found_note(self):
         """

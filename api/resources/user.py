@@ -1,85 +1,99 @@
 from api import Resource, abort, reqparse, auth
 from api.models.user import UserModel
-from api.schemas.user import user_schema, users_schema, UserSchema, UserRequestSchema
+from api.schemas.user import UserSchema, UserRequestSchema
 from flask_apispec.views import MethodResource
 from flask_apispec import marshal_with, use_kwargs, doc
+from webargs import fields
+
+# language=YAML <-- оставил для примера
+"""
+Get User by id
+---
+tags:
+    - Users
+parameters:
+     - in: path
+       name: user_id
+       type: integer
+       required: true
+       default: 1
+responses:
+   200:
+       description: A single user item
+       schema:
+           id: User
+           properties:
+               id:
+                   type: integer
+                   description: user id
+                   default: 1
+               username:
+                   type: string
+                   description: The name of the user
+                   default: Steven Wilson
+               is_staff:
+                   type: boolean
+                   description: user is staff
+                   default: false
+               role:
+                   type: string
+                   description: user role
+                   default: simple_user
+"""
 
 
-@doc(description='Api for notes.', tags=['Users'])
+@doc(tags=['Users'])
 class UserResource(MethodResource):
-    @marshal_with(UserSchema, code=200, description="Get single User")
+    @doc(summary="Get user by id", description="Returns single user")
+    @doc(responses={404: {"description": 'User not found'}})
+    @marshal_with(UserSchema, code=200)
     def get(self, user_id):
-        # language=YAML
-        """
-        Get User by id
-        ---
-        tags:
-            - Users
-        parameters:
-             - in: path
-               name: user_id
-               type: integer
-               required: true
-               default: 1
-        responses:
-           200:
-               description: A single user item
-               schema:
-                   id: User
-                   properties:
-                       id:
-                           type: integer
-                           description: user id
-                           default: 1
-                       username:
-                           type: string
-                           description: The name of the user
-                           default: Steven Wilson
-                       is_staff:
-                           type: boolean
-                           description: user is staff
-                           default: false
-                       role:
-                           type: string
-                           description: user role
-                           default: simple_user
-        """
         user = UserModel.query.get(user_id)
         if not user:
             abort(404, error=f"User with id={user_id} not found")
         return user, 200
 
     @auth.login_required(role="admin")
-    def put(self, user_id):
-        parser = reqparse.RequestParser()
-        parser.add_argument("username", required=True)
-        user_data = parser.parse_args()
+    @doc(summary="Edit user by id")
+    @use_kwargs({"username": fields.Str(), "role": fields.Str()})
+    @marshal_with(UserSchema)
+    @doc(responses={401: {"description": "Not authorization"}})
+    @doc(responses={404: {"description": 'User not found'}})
+    @doc(security=[{"basicAuth": []}])
+    def put(self, user_id, **kwargs):
         user = UserModel.query.get(user_id)
-        user.username = user_data["username"]
+        if not user:
+            abort(404, error=f"User with id={user_id} not found")
+        user.username = kwargs.get("username") or user.username
+        user.role = kwargs.get("role") or user.role
         user.save()
-        return user_schema.dump(user), 200
+        return user, 200
 
-    @auth.login_required
+    @auth.login_required(role="admin")
+    @doc(summary='Delete user by id')
+    @doc(responses={401: {"description": "Not authorization"}})
+    @doc(responses={404: {"description": "Not found"}})
+    @marshal_with(UserSchema)
+    @doc(security=[{"basicAuth": []}])
     def delete(self, user_id):
-        raise NotImplemented  # не реализовано!
+        user = UserModel.query.get(user_id)
+        if not user:
+            abort(404, error=f"User with id:{user_id} not found")
+        user.delete()
+        return user, 200
 
 
 @doc(description='Api for notes.', tags=['Users'])
 class UsersListResource(MethodResource):
+    @doc(summary="Get all Users")
+    @marshal_with(UserSchema(many=True), code=200)
     def get(self):
-        # language=YAML
-        """
-        Get all Users
-        ---
-        tags:
-           - Users
-        """
-
         users = UserModel.query.all()
-        return users_schema.dump(users), 200
+        return users, 200
 
-    @doc(description="Create new User")
+    @doc(summary="Create new User")
     @marshal_with(UserSchema, code=201)
+    @doc(responses={400: {"description": "User with username already exist"}})
     @use_kwargs(UserRequestSchema, location=('json'))
     def post(self, **kwargs):
         user = UserModel(**kwargs)

@@ -8,6 +8,10 @@ class NoteModel(db.Model):
     text = db.Column(db.String(255), unique=False, nullable=False)
     private = db.Column(db.Boolean(), default=True, nullable=False)
 
+    @classmethod
+    def get_all_for_user(cls, author):
+        return cls.query.filter((NoteModel.author.has(id=author.id)) | (NoteModel.private == False))
+
     def save(self):
         db.session.add(self)
         db.session.commit()

@@ -7,15 +7,15 @@ from api.models.user import UserModel
 
 
 # Сериализация ответа(response)
-class UserSchema(ma.SQLAlchemySchema):
+class UserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = UserModel
-        # fields = ('id', 'username', "is_staff", "role")
+        fields = ('id', 'username', "is_staff", "role")
 
-    id = ma.auto_field()
-    username = ma.auto_field()
-    is_staff = ma.auto_field()
-    role = ma.auto_field()
+    # id = ma.auto_field()
+    # username = ma.auto_field()
+    # is_staff = ma.auto_field()
+    # role = ma.auto_field()
 
 
 # Десериализация запроса(request)
@@ -27,7 +27,3 @@ class UserRequestSchema(ma.SQLAlchemySchema):
     username = ma.Str(required=True)
     password = ma.Str(required=True)
     role = ma.Str()
-
-
-user_schema = UserSchema()
-users_schema = UserSchema(many=True)
