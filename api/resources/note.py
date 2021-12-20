@@ -90,3 +90,14 @@ class NoteSetTagsResource(MethodResource):
             note.tags.append(tag)
         note.save()
         return note, 200
+
+
+@doc(tags=['Notes'])
+class NoteFilerResource(MethodResource):
+    @use_kwargs({"username": fields.Str()}, location=('query'))
+    @marshal_with(NoteSchema(many=True))
+    def get(self, **kwargs):
+        notes = NoteModel.query. \
+            filter_by(private=False). \
+            filter(NoteModel.author.has(**kwargs)).all()
+        return notes, 200
