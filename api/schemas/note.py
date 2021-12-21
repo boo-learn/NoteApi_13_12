@@ -11,6 +11,10 @@ class NoteSchema(ma.SQLAlchemyAutoSchema):
         model = NoteModel
 
     author = ma.Nested(UserSchema())
+    _links = ma.Hyperlinks({
+        'self': ma.URLFor('noteresource', values=dict(note_id="<id>")),
+        'collection': ma.URLFor('noteslistresource')
+    })
 
 
 class NoteCreateSchema(ma.SQLAlchemyAutoSchema):

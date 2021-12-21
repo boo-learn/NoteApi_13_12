@@ -1,3 +1,4 @@
+import logging
 from config import Config
 from flask import Flask, g
 from flask_restful import Api, Resource, abort, reqparse
@@ -39,6 +40,14 @@ auth = HTTPBasicAuth()
 # swagger = Swagger(app)
 docs = FlaskApiSpec(app)
 
+# Общие настройки логера
+logging.basicConfig(filename='record.log',
+                   level=logging.WARNING,
+                   format=f'%(asctime)s %(levelname)s %(name)s : %(message)s')
+# Настройка уровня логирования flask
+# app.logger.setLevel(logging.DEBUG)
+# Настройка уровня логирования сервера-разработки werkzeug
+# logging.getLogger('werkzeug').setLevel(logging.DEBUG)
 
 @auth.verify_password
 def verify_password(username_or_token, password):
@@ -53,6 +62,7 @@ def verify_password(username_or_token, password):
         if not user or not user.verify_password(password):
             return False
     g.user = user
+    logging.warning("!!!Request with auth User")
     return True
 
 
