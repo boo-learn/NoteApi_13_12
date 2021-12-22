@@ -1,4 +1,4 @@
-from api import auth, abort, g, Resource, reqparse
+from api import auth, abort, g, Resource, reqparse, api
 from api.models.note import NoteModel
 from api.models.tag import TagModel
 from flask_apispec import marshal_with, use_kwargs, doc
@@ -6,6 +6,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from api.schemas.note import NoteSchema, NoteCreateSchema, NoteEditSchema
 from flask_apispec.views import MethodResource
 from webargs import fields
+from helpers.shortcuts import get_or_404
 
 
 @doc(tags=['Notes'])
@@ -101,3 +102,27 @@ class NoteFilerResource(MethodResource):
             filter_by(private=False). \
             filter(NoteModel.author.has(**kwargs)).all()
         return notes, 200
+
+
+@doc(tags=['Notes'])
+@api.resource(
+    '/notes/<int:note_id>/restore',  # PUT
+    '/notes/<int:note_id>/archive'  # DEL
+)
+class NoteArchive(MethodResource):
+    def put(self, note_id):
+        pass
+
+    @doc(summary="Move Note to archive")
+    @marshal_with(NoteSchema)
+    def delete(self, note_id):
+        note = get_or_404(NoteModel, note_id)
+        note.archive = True
+        note.save()
+        return note, 200
+
+# url: to archive
+# notes/id/archive #del
+
+# url: restore from archive
+# note/id/restore  #put

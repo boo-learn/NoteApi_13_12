@@ -1,6 +1,7 @@
 from api import db
 from api.models.user import UserModel
 from api.models.tag import TagModel
+from sqlalchemy.sql import expression
 
 tags = db.Table('tags',
                 db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), primary_key=True),
@@ -14,6 +15,7 @@ class NoteModel(db.Model):
     text = db.Column(db.String(255), unique=False, nullable=False)
     private = db.Column(db.Boolean(), default=True, nullable=False)
     tags = db.relationship(TagModel, secondary=tags, lazy='subquery', backref=db.backref('notes', lazy=True))
+    archive = db.Column(db.Boolean(), default=False, server_default=expression.false(), nullable=False)
 
     @classmethod
     def get_all_for_user(cls, author):
