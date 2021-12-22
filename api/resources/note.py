@@ -1,4 +1,4 @@
-from api import auth, abort, g, Resource, reqparse, api
+from api import auth, abort, g, Resource, reqparse, api, app
 from api.models.note import NoteModel
 from api.models.tag import TagModel
 from flask_apispec import marshal_with, use_kwargs, doc
@@ -104,15 +104,10 @@ class NoteFilerResource(MethodResource):
         return notes, 200
 
 
+# @api.resource('/notes/<int:note_id>/restore')  # PUT
 @doc(tags=['Notes'])
-@api.resource(
-    '/notes/<int:note_id>/restore',  # PUT
-    '/notes/<int:note_id>/archive'  # DEL
-)
+@api.resource('/notes/<int:note_id>/archive')  # DEL
 class NoteArchive(MethodResource):
-    def put(self, note_id):
-        pass
-
     @doc(summary="Move Note to archive")
     @marshal_with(NoteSchema)
     def delete(self, note_id):
@@ -121,8 +116,11 @@ class NoteArchive(MethodResource):
         note.save()
         return note, 200
 
-# url: to archive
-# notes/id/archive #del
+# BAD:
+# GET: /notes
+# GET: /notes/public
+# GET: /notes/public/filter?username=<un>
+# GET: /notes/filter?tag=<tag_name>
 
-# url: restore from archive
-# note/id/restore  #put
+# GOOD:
+# GET: /notes?public=true/false&username=<un>&tag=<tag_name>
