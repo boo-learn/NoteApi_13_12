@@ -3,6 +3,7 @@ from api.resources import note
 from api.resources.user import UserResource, UsersListResource
 from api.resources.auth import TokenResource
 from api.resources.tag import TagsResource, TagsListResource
+from api.resources.file import UploadPictureResource
 from config import Config
 
 # CRUD
@@ -46,6 +47,7 @@ docs.register(TagsListResource)
 docs.register(note.NoteSetTagsResource)
 docs.register(note.NoteFilerResource)
 docs.register(note.NoteArchive)
+docs.register(UploadPictureResource)
 
 if __name__ == '__main__':
     app.run(debug=Config.DEBUG, port=Config.PORT)

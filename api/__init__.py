@@ -1,6 +1,6 @@
 import logging
 from config import Config
-from flask import Flask, g
+from flask import Flask, g, send_from_directory
 from flask_restful import Api, Resource, abort, reqparse
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -10,7 +10,7 @@ from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 from flask_apispec.extension import FlaskApiSpec
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder=Config.UPLOAD_FOLDER)
 app.config.from_object(Config)
 
 security_definitions = {
@@ -19,11 +19,12 @@ security_definitions = {
     }
 }
 
+ma_plugin = MarshmallowPlugin()
 app.config.update({
     'APISPEC_SPEC': APISpec(
         title='Notes Project',
         version='v1',
-        plugins=[MarshmallowPlugin()],
+        plugins=[ma_plugin],
         securityDefinitions=security_definitions,
         security=[],
         openapi_version='2.0.0'
@@ -42,8 +43,10 @@ docs = FlaskApiSpec(app)
 
 # Общие настройки логера
 logging.basicConfig(filename='record.log',
-                   level=logging.WARNING,
-                   format=f'%(asctime)s %(levelname)s %(name)s : %(message)s')
+                    level=logging.WARNING,
+                    format=f'%(asctime)s %(levelname)s %(name)s : %(message)s')
+
+
 # Настройка уровня логирования flask
 # app.logger.setLevel(logging.DEBUG)
 # Настройка уровня логирования сервера-разработки werkzeug
@@ -69,3 +72,8 @@ def verify_password(username_or_token, password):
 @auth.get_user_roles
 def get_user_roles(user):
     return g.user.get_roles()
+
+
+@app.route('/uploads/<path:filename>')
+def download_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename, as_attachment=True)

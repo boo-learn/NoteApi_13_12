@@ -13,3 +13,5 @@ class Config:
     RESTFUL_JSON = {
         'ensure_ascii': False,
     }
+    UPLOAD_FOLDER_NAME = 'upload'
+    UPLOAD_FOLDER = os.path.join(base_dir, UPLOAD_FOLDER_NAME)
