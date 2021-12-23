@@ -1,7 +1,7 @@
 import logging
 from config import Config
 from flask import Flask, g, send_from_directory
-from flask_restful import Api, Resource, abort, reqparse
+from flask_restful import Api, Resource, abort, reqparse, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_marshmallow import Marshmallow
@@ -9,6 +9,7 @@ from flask_httpauth import HTTPBasicAuth
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 from flask_apispec.extension import FlaskApiSpec
+from flask_babel import Babel
 
 app = Flask(__name__, static_folder=Config.UPLOAD_FOLDER)
 app.config.from_object(Config)
@@ -40,6 +41,7 @@ ma = Marshmallow(app)
 auth = HTTPBasicAuth()
 # swagger = Swagger(app)
 docs = FlaskApiSpec(app)
+babel = Babel(app)
 
 # Общие настройки логера
 logging.basicConfig(filename='record.log',
@@ -77,3 +79,8 @@ def get_user_roles(user):
 @app.route('/uploads/<path:filename>')
 def download_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename, as_attachment=True)
+
+
+@babel.localeselector
+def get_locale():
+    return request.accept_languages.best_match(app.config['LANGUAGES'])
