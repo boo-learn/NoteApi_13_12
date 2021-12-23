@@ -114,8 +114,7 @@ class NoteArchive(MethodResource):
     @marshal_with(NoteSchema)
     def delete(self, note_id):
         note = get_or_404(NoteModel, note_id)
-        note.archive = True
-        note.save()
+        note.delete()
         return note, 200
 
 # BAD:

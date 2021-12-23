@@ -1,6 +1,6 @@
 from api import api, app, docs
 from api.resources import note
-from api.resources.user import UserResource, UsersListResource
+from api.resources.user import UserResource, UsersListResource, UsersSearchResource
 from api.resources.auth import TokenResource
 from api.resources.tag import TagsResource, TagsListResource
 from api.resources.file import UploadPictureResource
@@ -14,6 +14,8 @@ from config import Config
 # Delete --> DELETE
 api.add_resource(UsersListResource,
                  '/users')  # GET, POST
+api.add_resource(UsersSearchResource,
+                 '/users/search')  # GET
 api.add_resource(UserResource,
                  '/users/<int:user_id>')  # GET, PUT, DELETE
 
@@ -48,6 +50,7 @@ docs.register(note.NoteSetTagsResource)
 docs.register(note.NoteFilerResource)
 docs.register(note.NoteArchive)
 docs.register(UploadPictureResource)
+docs.register(UsersSearchResource)
 
 if __name__ == '__main__':
     app.run(debug=Config.DEBUG, port=Config.PORT)

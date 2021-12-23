@@ -101,3 +101,17 @@ class UsersListResource(MethodResource):
         if not user.id:
             abort(400, error=f"User with username:{user.username} already exist")
         return user, 201
+
+
+@doc(description='Api for users.', tags=['Users'])
+class UsersSearchResource(MethodResource):
+    @doc(summary="Get list of all users by search")
+    @use_kwargs({"username": fields.Str()}, location=('query'))
+    @marshal_with(UserSchema(many=True), code=200)
+    def get(self, **kwargs):
+        users = []
+        if kwargs.get("username"):
+            users = UserModel.query.filter(UserModel.username.like(f'%{kwargs["username"]}%')).all()
+        return users, 200
+
+# endpoint: /users/search

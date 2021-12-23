@@ -26,5 +26,9 @@ class NoteModel(db.Model):
         db.session.commit()
 
     def delete(self):
-        db.session.delete(self)
-        db.session.commit()
+        self.archive = True
+        self.save()
+
+    def restore(self):
+        self.archive = False
+        self.save()
