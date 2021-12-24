@@ -2,6 +2,8 @@ from api import db
 from api.models.user import UserModel
 from api.models.tag import TagModel
 from sqlalchemy.sql import expression
+from api.models.base import MixinMethods
+
 
 tags = db.Table('tags',
                 db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), primary_key=True),
@@ -9,7 +11,7 @@ tags = db.Table('tags',
                 )
 
 
-class NoteModel(db.Model):
+class NoteModel(db.Model, MixinMethods):
     id = db.Column(db.Integer, primary_key=True)
     author_id = db.Column(db.Integer, db.ForeignKey(UserModel.id))
     text = db.Column(db.String(255), unique=False, nullable=False)
@@ -20,14 +22,6 @@ class NoteModel(db.Model):
     @classmethod
     def get_all_for_user(cls, author):
         return cls.query.filter((NoteModel.author.has(id=author.id)) | (NoteModel.private == False))
-
-    def save(self):
-        db.session.add(self)
-        db.session.commit()
-
-    def delete(self):
-        self.archive = True
-        self.save()
 
     def restore(self):
         self.archive = False
